@@ -1,0 +1,50 @@
+html,
+body {
+  height: 100%;
+  background-color: lightpink;
+  text-align: center;
+}
+
+h1 {
+  color: black;
+  text-decoration: underline;
+}
+
+header {
+  border-radius: 10px;
+  background-color: lightskyblue;
+  border: 2px solid gray;
+}
+
+.button {
+  background-color: lightpink;
+  border-radius: 10px;
+  color: black;
+  text-align: center;
+  display: inline-block;
+  font-size: 10px;
+}
+
+.formulaires {
+  width: 49%;
+  display: inline-block;
+  vertical-align: top;
+  border-radius: 10px;
+  background-color: lightgreen;
+  border: 2px solid gray;
+}
+
+.resultats {
+  display: inline-block;
+  vertical-align: top;
+  border-radius: 10px;
+  background-color: lightgreen;
+  border: 2px solid gray;
+}
+
+
+table,
+td {
+	text-align: center;
+	border: 1px solid black;
+}

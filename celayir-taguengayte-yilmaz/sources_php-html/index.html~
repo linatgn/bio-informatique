@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Analyse Informatique de Données Biologiques</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+  </head>
+
+  <header>
+    <h1>Analyse Informatique de Données Biologiques</h1>
+  </header>
+
+
+    <div id="formulaire1" class="formulaires">
+        <form method="post" action="question2.php">
+            <h2>Consultation de Fiche</h2>
+            <h3>Entrez le numéro d'accession:</h3>
+            <!-- Zone d'entree de texte -->
+            <input type="text" name="accession"></input>
+            <!-- Bouton de type "submit" qui va envoyer les informations -->
+            <input type="submit" name="submit" value="Info Entry" class="button"> </input> <br> <br>
+        </form>
+    </div>
+
+    <div id="formulaire2" class="formulaires">
+        <form method="post" action="question3.php">
+            <!-- Titre du formulaire -->
+            <h2>Accession à trouver</h2>
+            <!-- Premiere zone d'entree de texte -->
+            Nom du gène: <br> <input type="text" name="nomGene"> </input> <br> <br>
+            <!-- Seconde zone d'entree de texte -->
+            Nom de la proteine: <br> <input type="text" name="nomProt"> </input> <br> <br>
+            <!-- Troisieme zone d'entree de texte -->
+            Commentaires: <br> </Commentaires:br> <input type="text" name="commentaires"> </input> <br> <br>
+            <!-- Bouton de type "submit" qui va envoyer les informations -->
+            <input type="submit" name="submit" value="Search" class="button"> </input> <br> <br>
+        </form>
+    </div>
+
+</html>

@@ -1,0 +1,15 @@
+[ORACLE]
+USER=c##hcelayi_a
+PASSWD=hcelayi_a
+SID=dbinfo
+[PERSIST]
+Comment=TRUE
+DbRef=TRUE
+Entry=TRUE
+GeneName=TRUE
+Keyword=TRUE
+Protein=TRUE
+ProtName=TRUE
+[LOADFILES]
+FILE1=examples/exemplesDonnees.xml
+FILE2=examples/exemplesDonnees2.xml

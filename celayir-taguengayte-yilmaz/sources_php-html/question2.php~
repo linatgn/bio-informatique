@@ -1,0 +1,193 @@
+<html>
+
+    <head>
+        <!-- Importation du css -->
+        <link rel="stylesheet" href="style.css" type="text/css" />
+    </head>
+
+    <body>
+        <?php
+        /* Cree une division avec l'id "zoomed2" pour que tout ce qui est dans cette div
+         * soit zoome et affiche le titre de la page
+         */
+        echo '<div id="zoomed2"><h1>Projet Analyse Informatique de Données Biologiques</h1>';
+
+            // Récupérer dans des variables locales les paramètres du formulaire
+            $ac = $_REQUEST['accession'];
+
+            //Connection a sqlPlus avec les identifiants : frazafi
+            $connexion = oci_connect('c##myilma1_a', 'myilma1_a', 'dbinfo');
+            
+            // Informations sur la séquence
+            $txtReq = " select  p.seq, p.seqLength, p.seqMass, e.specie "
+            . "from proteins p, entries e "
+            . "where e.accession = :acces "
+            . "and p.accession = e.accession ";
+            // Pour débugger on affiche le texte de la requête:
+            // echo "<i>(debug : ".$txtReq.")</i><br>";
+            
+            // Noms des protéines avec leurs types et sortes
+            $protReq = " select  pn.prot_name_id, pn.prot_name, pn.name_kind, pn.name_type "
+            . "from proteins p, protein_names pn, prot_name_2_prot p2 "
+            . "where p.accession = :acces "
+            . "and p.accession = p2.accession "
+            . "and p2.prot_name_id = pn.prot_name_id ";
+            
+            // Noms des gènes et leurs types
+            $geneReq = " select  gn.gene_name, gn.name_type "
+            . "from gene_names gn, entry_2_gene_name g2, entries e "
+            . "where e.accession = :acces "
+            . "and e.accession = g2.accession "
+            . "and g2.gene_name_id = gn.gene_name_id ";
+            
+            // Keywords
+            $keyReq = " select  k.kw_label "
+            . "from keywords k, entries_2_keywords k2, entries e "
+            . "where e.accession = :acces "
+            . "and e.accession = k2.accession "
+            . "and k2.kw_id = k.kw_id ";
+            
+            // Commentaire
+            $commReq = " select  c.type_c, c.txt_c "
+            . "from comments c, entries e "
+            . "where e.accession = :acces "
+            . "and e.accession = c.accession ";
+
+            //Termes GO
+            $goReq = "select db.db_ref "
+            . "from dbref db, entries e "
+            . "where e.accession = :acces "
+            . "and e.accession = db.accession ";
+
+            //Creation des ordres
+            $ordre1 = oci_parse($connexion, $txtReq);
+            $ordre2 = oci_parse($connexion, $protReq);
+            $ordre3 = oci_parse($connexion, $geneReq);
+            $ordre4 = oci_parse($connexion, $keyReq);
+            $ordre5 = oci_parse($connexion, $commReq);
+            $ordre6 = oci_parse($connexion, $goReq);
+
+            //Affectation des noms
+            oci_bind_by_name($ordre1, ":acces", $ac);
+            oci_bind_by_name($ordre2, ":acces", $ac);
+            oci_bind_by_name($ordre3, ":acces", $ac);
+            oci_bind_by_name($ordre4, ":acces", $ac);
+            oci_bind_by_name($ordre5, ":acces", $ac);
+            oci_bind_by_name($ordre6, ":acces", $ac);
+
+
+            // Exécution de la requête 1
+            oci_execute($ordre1);
+            echo '<h2> Sequence information </h2> ';
+            echo '<u>Sequence :</u> <br><br>';
+            //On cree une textarea dans laquelle on va mettre 
+            //notre sequence
+            echo '<textarea id="texte">';
+            while (($row = oci_fetch_array($ordre1, OCI_BOTH)) !=false) {
+                 echo $row[0]->load();                
+            } 
+            echo '</textarea>';
+            echo '
+            <!-- Fonction pour copier la sequence -->
+            <script>
+            function copy() {
+                var textarea = document.getElementById("texte");
+                textarea.select();
+                document.execCommand("copy");
+            }
+            </script><br>
+            <!-- Bouton de copy -->
+            <button onclick="copy()">Copy Sequence</button>';
+
+            //On reexecute l'ordre 1 afin d'afficher ce qu'il
+            //reste a afficher -> SeqLength, SeqMass and Specie
+            oci_execute($ordre1);
+            //Pour afficher notre lien on utlise la balise <a> html
+            //pour integrer un lien dans laquelle on y met notre variable
+            while (($row = oci_fetch_array($ordre1, OCI_BOTH)) !=false) {
+                echo '<br><br><br><u>SeqLength :</u>  ' . $row[1].
+                 '<br><br><u>SeqMass :</u> ' . $row[2].
+                 '<br><br><u>Specie :</u> ' . '<a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id='. $row[3]. ' ">'. $row[3].'</a>'; 
+                
+            }
+            
+            
+            // Exécution de la requête 2
+            oci_execute($ordre2);
+            echo '<br> <h2>Proteins information</h2>';
+            while (($row = oci_fetch_array($ordre2, OCI_BOTH)) !=false) {
+                echo '<u>Prot_name_id :</u> ' . $row[0] . '<br><br><u>Protein name :</u> ' . $row[1]. '<br><br><u>Name kind :</u> ' . $row[2]. '<br><br><u>Name type :</u> ' . $row[3] ;         
+            }
+            echo '<br>';
+            
+            // Exécution de la requête 3
+            oci_execute($ordre3);
+            echo '<br> <h2> Gene Names</h2>';
+            while (($row = oci_fetch_array($ordre3, OCI_BOTH)) !=false) {
+                echo '<br><u>Gene name :</u> ' . $row[0] . '<br><br><u>Name type :</u> ' . $row[1] . '<br>'; 
+            }
+            echo '<br>';
+
+             // Exécution de la requête 4
+            oci_execute($ordre4);
+            echo '<br> <h2>Keywords associated </h2>';
+            //Afin de rendre plus propre l'affichge des keywords
+            //On cree une <table>
+            echo '<table>';
+            $i = 0; //Variable qui va nous servir pour implementer notre tableau
+            while (($row = oci_fetch_array($ordre4, OCI_BOTH)) !=false) {
+                //Le modulo sert a faire deux colonnes
+                if(($i%2 == 0)) {
+                    echo '</tr><tr><td>' . $row[0] . '</td>';
+                } else {
+                echo  '<td>' . $row[0] . '</td>'; 
+                }
+                $i++;
+            }
+            echo '</table>'; //Fin de la <table>
+            
+            // Exécution de la requête 5
+            oci_execute($ordre5);
+            echo '<br> <h2> Comments associated</h2>';
+            while (($row = oci_fetch_array($ordre5, OCI_BOTH)) !=false) {
+
+                echo '<br><u>Comment type :</u><br>  ' . $row[0] . '<br><br><u>Details :</u><br> ' . $row[1] . '<br>'; 
+            }
+
+
+            //Execution de la requete 6
+            oci_execute($ordre6);
+            echo '<br> <h2> Termes GO </h2>';
+            echo '<u> References</u>';
+            //Meme fonctionnement que pour la requete 4
+            $i = 0;
+            echo '<table>';
+            while(($row = oci_fetch_array($ordre6, OCI_BOTH)) != false) {
+                //On additionne ce que l'on a fait pour les requete 1 et 4
+                //On fait un modulo 6 pour avoir 6 colonnes et on met la balise
+                //<a> html afin de mettre toutes les references en liens cliquables
+                if(($i%6) == 0) {
+                    echo '</tr><tr><td><a href="https://www.ebi.ac.uk/QuickGO/term/'. $row[0]. '">' . $row[0] . '</a></td>';
+                } else {
+                    echo '<td><a href="https://www.ebi.ac.uk/QuickGO/term/'. $row[0]. '">' . $row[0] . '</a></td>';
+                }
+                $i++;
+            }
+            echo '</table>'; //Fin de la <table>
+            echo '</div>'; //Fin de la <div> qui va etre zoomed x1.2
+
+            //libération de la mémoire
+            oci_free_statement($ordre1);
+            oci_free_statement($ordre2);
+            oci_free_statement($ordre3);
+            oci_free_statement($ordre4);
+            oci_free_statement($ordre5);
+            oci_free_statement($ordre6);
+
+            //On ferme la connection a sqlPlus
+            oci_close($connexion);
+
+        ?>
+
+    </body>
+</html>

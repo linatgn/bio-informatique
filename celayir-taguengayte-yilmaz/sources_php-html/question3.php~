@@ -1,0 +1,67 @@
+<html>
+    <head>
+    	<!-- Importation du css -->
+        <link rel="stylesheet" href="style.css" type="text/css" />
+    </head>
+    <body>
+
+    <?php
+    //Creation d'une division dans laquelle tout ce qui s'y
+    //trouve sera zoomed
+    echo '<div id="zoomed">';
+    //Titre de la page
+    echo '<h1>Projet Analyse Informatique de Données Biologiques</h1>';
+    	//Sous titre de la page
+        echo '<h2>Résultats de la recherche</h2>';
+      	//Declaration des variables qui contiennent
+      	//les entrees des formulaires  
+    	$ng = $_REQUEST['nomGene'];
+    	$np = $_REQUEST['nomProt'];
+    	$com = $_REQUEST['commentaires'];
+    	//Connection a sqlPlus avec le compte frazafi
+    	$connexion = oci_connect('c##myilma1_a', 'myilma1_a', 'dbinfo');
+
+    	//Creation de la requete sql
+    	$txtReq = "select distinct e.accession "
+    	. "from entries e, gene_names gn, entry_2_gene_name egn, protein_names pn, proteins p, prot_name_2_prot pnp, comments c "
+    	. "where e.accession = egn.accession "
+    	//Nom du gene
+    	. "and egn.gene_name_id = gn.gene_name_id "
+    	. "and gn.gene_name like '%$ng%' "
+    	//Noms de la proteine
+    	. "and e.accession = p.accession "
+    	. "and p.accession = pnp.accession "
+    	. "and pnp.prot_name_id = pn.prot_name_id "
+    	. "and pn.prot_name like '%$np%' "
+    	//Commentaires
+    	. "and e.accession = c.accession "
+    	. "and c.txt_c like '%$com%' ";
+
+    	//Creation de l'ordre
+    	$ordre1 = oci_parse($connexion, $txtReq);
+
+    	//Exectution de l'ordre
+    	oci_execute($ordre1);
+    	//Initialisation d'une varible pour notre boucle
+        $i = 0;
+    	while(($row = oci_fetch_array($ordre1, OCI_BOTH)) != false) {
+    		//Affiche des lignes composee de 3 elements
+            if(($i == 3)) {
+            	//Chaque element est un formulaire de type submit et qui donc est comme un boutton 
+                echo '<form method="post" action="q2.php">  <input type="submit" name="accession" value="' . $row[0]. '"> </input><br><br>    ';
+                $i = 0;
+            } else {
+                echo '<form method="post" action="q2.php">  <input type="submit" name="accession" value="' . $row[0]. '"> </input>    ';
+                $i++;
+            }
+    	}
+
+    	//Liberation de la memoire
+    	oci_free_statement($ordre1);
+    	//Fermeture de la connection
+    	oci_close($connexion);
+        echo '</div>'; //Fermeture de la balise <div>
+    ?>
+
+    </body>
+</html>
